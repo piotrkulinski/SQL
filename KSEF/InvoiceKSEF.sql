@@ -77,8 +77,8 @@ table (
   Typ int default 0 -- 1 - rozliczenie (pomniejszenie faktur o zaliczki)
 )  
 
--- warto eksportowaæ te¿ faktury z POS, wiêc dla nich zostan¹ dodane opcje maskuj¹ce/mapuj¹ce
---- synonim dla funkcji dbo.PozycjeDoWydruku aby raz pobiera³a dane z tabel szefa innym razem posowych
+-- warto eksportowaÄ‡ teÅ¼ faktury z POS, wiÄ™c dla nich zostanÄ… dodane opcje maskujÄ…ce/mapujÄ…ce
+--- synonim dla funkcji dbo.PozycjeDoWydruku aby raz pobieraÅ‚a dane z tabel szefa innym razem posowych
 if OBJECT_ID('MapPozycjeDoWydruku')<>0 begin
 	drop synonym MapPozycjeDoWydruku
 end
@@ -99,7 +99,7 @@ if (@application='POS') begin
 	from rejvat h with(nolock)
 	where h.ID=@ID
 
-	-- za³adowanie g³ówki faktury któr¹ skorygowaliœmy
+	-- zaÅ‚adowanie gÅ‚Ã³wki faktury ktÃ³rÄ… skorygowaliÅ›my
 	if exists (select top 1 1 from @NaglowekFaktury where [KorektaDoDokumentuID]<>0) begin
 		insert into @NaglowekFakturyKorygowanej
 		select top 1
@@ -129,7 +129,7 @@ else begin
 	from nds with(nolock)
 	where nds.IDDokumentu=@ID
 
-	-- za³adowanie g³ówki faktury któr¹ skorygowaliœmy
+	-- zaÅ‚adowanie gÅ‚Ã³wki faktury ktÃ³rÄ… skorygowaliÅ›my
 	if exists (select top 1 1 from @NaglowekFaktury where [KorektaDoDokumentuID]<>0) begin
 		insert into @NaglowekFakturyKorygowanej
 		select 
@@ -198,7 +198,7 @@ StalyDopisekDoFaktury = isnull((select top 1 opis
 insert into @PozycjeFaktury exec [dbo].[MapPozycjeDoWydruku] @ID 
 
 select @TypDokumentu = TypDokumentu from @NaglowekFaktury 
-if (@TypDokumentu<>'KOREK' and @application<>'POS') -- bo korekta ma ju¿ w sobie pozycje +/i i nie trzeba dodatkowo komensowaæ innych dokumentów
+if (@TypDokumentu<>'KOREK' and @application<>'POS') -- bo korekta ma juÅ¼ w sobie pozycje +/i i nie trzeba dodatkowo komensowaÄ‡ innych dokumentÃ³w
 begin
 
 if exists(select * from @NaglowkiZaliczek) begin
@@ -266,14 +266,14 @@ select 1,@ID,Konto,SymbVat,stawkavat,@count_poz /*sum(pozycji)*/,max(CzySprzedaz
 from @totalizer x
 group by x.Konto,x.SymbVat,stawkavat,x.CzySprzedazWedlugNetto  
 
--- pozycje korekty musz¹ byæ odwrócone, najpierw pozycja korygowana na (-), póŸniej koryguj¹ca na (+)
--- dodatkowo dla nowych pozycji, musi byæ dodana równie¿ pozycja z iloœci¹ i wartoœci¹ zero, jako pozycja korygowana
+-- pozycje korekty muszÄ… byÄ‡ odwrÃ³cone, najpierw pozycja korygowana na (-), pÃ³Åºniej korygujÄ…ca na (+)
+-- dodatkowo dla nowych pozycji, musi byÄ‡ dodana rÃ³wnieÅ¼ pozycja z iloÅ›ciÄ… i wartoÅ›ciÄ… zero, jako pozycja korygowana
 if (@TypDokumentu='KOREK') begin
 	
 	if (@debug=1) begin
 	    exec dbo.ConvertKorekToKSEF @PozycjeFaktury
     end
-	-- todo: tu warto siê jeszcze przyjrzeæ na ró¿nych "konfiguracjach" korekty
+	-- todo: tu warto siÄ™ jeszcze przyjrzeÄ‡ na rÃ³Å¼nych "konfiguracjach" korekty
 	if (@application<>'POS') begin
 		declare @convertpos InvoicePosition
 		insert into @convertpos	exec dbo.ConvertKorekToKSEF @PozycjeFaktury
@@ -366,14 +366,14 @@ if (@kodSystemowy=1) begin
 								  else null --kf.Nazwa1 
 								end
 							else null
-						 end [ImiePierwsze] --tylko jeœli nie ma NIP-u (fizyczna)
+						 end [ImiePierwsze] --tylko jeÅ›li nie ma NIP-u (fizyczna)
 						 ,case when nip.Ustawiono=0
 							then case 
 								  when isnull(kf.kontakt,'')<>'' and charindex(' ',kf.kontakt)>0 then substring(kf.kontakt,charindex(' ',kf.kontakt)+1,len(kontakt))
 								  else null --kf.Nazwa2 
 								end
 							else null
-						 end [Nazwisko] --tylko jeœli nie ma NIP-u (fizyczna)
+						 end [Nazwisko] --tylko jeÅ›li nie ma NIP-u (fizyczna)
 					FOR XML PATH(''), ROOT('DaneIdentyfikacyjne'), TYPE
 				)
 				,(	
@@ -424,14 +424,14 @@ if (@kodSystemowy=1) begin
 		-- 					  else null --kf.Nazwa1 
 		-- 					end
 		-- 				else null
-		-- 			  end [ImiePierwsze] --tylko jeœli nie ma NIP-u (fizyczna)
+		-- 			  end [ImiePierwsze] --tylko jeÅ›li nie ma NIP-u (fizyczna)
 		-- 			 ,case when nip.Ustawiono=0
 		-- 				then case 
 		-- 					  when isnull(kfo.kontakt,'')<>'' and charindex(' ',kfo.kontakt)>0 then substring(kfo.kontakt,charindex(' ',kfo.kontakt)+1,len(kontakt))
 		-- 					  else null --kf.Nazwa2 
 		-- 					end
 		-- 				else null
-		-- 		 	end [Nazwisko] --tylko jeœli nie ma NIP-u (fizyczna)
+		-- 		 	end [Nazwisko] --tylko jeÅ›li nie ma NIP-u (fizyczna)
 		-- 			FOR XML PATH(''), ROOT('DaneIdentyfikacyjne'), TYPE
 		-- 	     )
 		-- ,( --Adres
@@ -485,8 +485,8 @@ if (@kodSystemowy=1) begin
 					select
 						 @CzyMetodaKasowa [P_16]
 						,2 [P_17] --samofakturowanie (1)
-						,2 [P_18] --odwrotne obci¹¿enie (1)
-						,2 [P_18A] --convert(int,case when t.brutto>15000 then 1 else 2 end)  --mechanizm podzielonej p³atnoœci(1)
+						,2 [P_18] --odwrotne obciÄ…Å¼enie (1)
+						,2 [P_18A] --convert(int,case when t.brutto>15000 then 1 else 2 end)  --mechanizm podzielonej pÅ‚atnoÅ›ci(1)
 						,2 [P_19]
 						,2 [P_22]
 						,2 [P_23]
@@ -541,7 +541,7 @@ if (@kodSystemowy=1) begin
 					end
 				,case when nds.Opis like '%do transakcji%' then 1 else null end  [FP]
 				,case when isnull(nabywca.GrupaJPKTP,0)=0 then null else 1 end [TP]
-				,( -- DodatkowyOpis -  w sumie s¹ jedynie do Faktur Vat Mar¿a
+				,( -- DodatkowyOpis -  w sumie sÄ… jedynie do Faktur Vat MarÅ¼a
 					select top 12 op.*
 					from (
 						select 
@@ -567,7 +567,7 @@ if (@kodSystemowy=1) begin
 					where op.wartosc<>''
 					FOR XML PATH('DodatkowyOpis'), TYPE
 				  ) 
-				,( -- FA(1) numery faktur zaliczkowych rozliczanych aktualn¹ faktur¹
+				,( -- FA(1) numery faktur zaliczkowych rozliczanych aktualnÄ… fakturÄ…
 				 	select 
 						 zal.NumerPelny [NrFaZaliczkowej]
 					from @NaglowkiZaliczek zal 
@@ -621,7 +621,7 @@ if (@kodSystemowy=1) begin
 					 ) as zal
 					 FOR XML PATH('Rozliczenie'), TYPE
 				   )
-				,( -- p³atnoœci
+				,( -- pÅ‚atnoÅ›ci
 				   select 
 				      case 
 						when nds.TerminPlatnosci>nds.DataDokumentu 
@@ -633,7 +633,7 @@ if (@kodSystemowy=1) begin
 						then null
 						else CONVERT(varchar(10),isnull(nds.TerminPlatnosci,nds.DataDokumentu),127)
 					  end [DataZaplaty]
-					 -- terminy p³atnoœci
+					 -- terminy pÅ‚atnoÅ›ci
 					 ,(
 						select 
 							CONVERT(varchar(10),nds.TerminPlatnosci,127) [TerminPlatnosci]
@@ -644,7 +644,7 @@ if (@kodSystemowy=1) begin
 						FOR XML PATH('TerminyPlatnosci'), TYPE
 					 )
 				     ,case 
-						when nds.FormaPlatnosci = 1 then 1 -- 1 gotówka
+						when nds.FormaPlatnosci = 1 then 1 -- 1 gotÃ³wka
 						when nds.FormaPlatnosci = 2 or fp.Rodzaj=2 then 6 -- 6 przelew
 						when nds.FormaPlatnosci = 3 then 2 -- 2 karta    
 						else 1
@@ -668,7 +668,7 @@ if (@kodSystemowy=1) begin
 				   left join @firma fi on 1=1 and fp.Rodzaj=2
 				   FOR XML PATH(''),ROOT('Platnosc'), TYPE
 				 )
-				 -- zaliczka - zamówienie
+				 -- zaliczka - zamÃ³wienie
 				 ,(
 				    select 
 						  t.pozycji [LiczbaWierszyZamowienia]
@@ -719,7 +719,7 @@ if (@kodSystemowy=1) begin
 			from @firma f
 			FOR XML PATH(''), ROOT('Stopka'), TYPE
 		)
-		FOR XML PATH('') --, ROOT('Faktura') odremowaæ root i scheme przed selectem g³ónym
+		FOR XML PATH('') --, ROOT('Faktura') odremowaÄ‡ root i scheme przed selectem gÅ‚Ã³nym
 	)
 end
 
@@ -782,8 +782,8 @@ if (@kodSystemowy=2) begin
 							end
 						,[KodUE] = null
 						,[NrVatUE] = null
-						,[KodKraju] = null -- jesli nip zagraniczny, mo¿na uzupe³niæ
-						,[NrID]=null -- jesli nip zagraniczny, mo¿na uzupe³niæ
+						,[KodKraju] = null -- jesli nip zagraniczny, moÅ¼na uzupeÅ‚niÄ‡
+						,[NrID]=null -- jesli nip zagraniczny, moÅ¼na uzupeÅ‚niÄ‡
 						,[BrakID] = case when nip.Ustawiono=0 then 1 else null end											
 						,[Nazwa] = isnull(kf.Nazwa1,'')+(case when isnull(kf.Nazwa2,'')='' then '' else ' '+kf.Nazwa2 end) 	
 					FOR XML PATH(''), ROOT('DaneIdentyfikacyjne'), TYPE
@@ -884,8 +884,8 @@ if (@kodSystemowy=2) begin
 					select
 						 @CzyMetodaKasowa [P_16]
 						,2 [P_17] --samofakturowanie (1)
-						,2 [P_18] --odwrotne obci¹¿enie (1)
-						,2 [P_18A] --convert(int,case when t.brutto>15000 then 1 else 2 end)  --mechanizm podzielonej p³atnoœci(1)
+						,2 [P_18] --odwrotne obciÄ…Å¼enie (1)
+						,2 [P_18A] --convert(int,case when t.brutto>15000 then 1 else 2 end)  --mechanizm podzielonej pÅ‚atnoÅ›ci(1)
 						,[Zwolnienie] = (
 							select 
 								[P_19N] = 1
@@ -950,7 +950,7 @@ if (@kodSystemowy=2) begin
 							,[NrFaKorygowany] = null
 							,[Podmiot1K] = null -- zmiana danych sprzedawcy
 							,[Podmiot2K] = null -- korekta danych Podmiotu2
-							,[P_15ZK] = null -- kwota faktury zaliczkowej przed korekt¹
+							,[P_15ZK] = null -- kwota faktury zaliczkowej przed korektÄ…
 							,[KursWalutyZK] = null 
 						from @NaglowekFakturyKorygowanej kor
 						FOR XML PATH(''), TYPE
@@ -960,7 +960,7 @@ if (@kodSystemowy=2) begin
 					end
 				,[FP] = case when nds.Opis like '%do transakcji%' then 1 else null end
 				,[TP] = case when isnull(nabywca.GrupaJPKTP,0)=0 then null else 1 end 
-				,( -- DodatkowyOpis -  w sumie s¹ jedynie do Faktur Vat Mar¿a
+				,( -- DodatkowyOpis -  w sumie sÄ… jedynie do Faktur Vat MarÅ¼a
 					select top 12 op.*
 					from (
 						select 
@@ -987,7 +987,7 @@ if (@kodSystemowy=2) begin
 					where op.wartosc<>''
 					FOR XML PATH('DodatkowyOpis'), TYPE
 				 ) 
-				,( -- FakturaZaliczkowa --zaliczki s¹ opakowane i prezentuj¹ numery ksef
+				,( -- FakturaZaliczkowa --zaliczki sÄ… opakowane i prezentujÄ… numery ksef
 				 	select 
 						(
 							select 
@@ -1022,7 +1022,7 @@ if (@kodSystemowy=2) begin
 						-- 	when @x_czy_info_rabat_fv=1 and lds.cena_nomin<>lds.cena 
 						-- 	then str(round(lds.cena_nomin*lds.ilosc,2)- round(lds.cena*lds.ilosc,2),12,2)
 						-- 	else null 
-						-- end --kwoty upustów
+						-- end --kwoty upustÃ³w
 					,[P_11] = case when lds.CzySprzedazWedlugNetto=1 then lds.XNetto else null end 
 					,[P_11A] = case when lds.CzySprzedazWedlugNetto=0 then lds.XBrutto else null end 
 					,[P_11AVat] = null
@@ -1078,7 +1078,7 @@ if (@kodSystemowy=2) begin
 					  	end 
 					,[ZnacznikZaplatyCzesciowej] = null
 					,[ZaplataCzesciowa] = null
-					,( -- terminy p³atnoœci
+					,( -- terminy pÅ‚atnoÅ›ci
 						select 
 							 [Termin] = CONVERT(varchar(10),nds.TerminPlatnosci,127) 
 							,[TerminOpis] = fp.Nazwa 
@@ -1089,7 +1089,7 @@ if (@kodSystemowy=2) begin
 					  )
 				    ,[FormaPlatnosci] = 
 					 	case 
-							when nds.FormaPlatnosci = 1 then 1 -- 1 documentation gotówka
+							when nds.FormaPlatnosci = 1 then 1 -- 1 documentation gotÃ³wka
 							when nds.FormaPlatnosci = 2 /*or fp.Rodzaj=2*/ then 6 -- 6 documentation przelew
 							when nds.FormaPlatnosci = 3 then 2 -- 2 documentation karta    
 							else null
@@ -1193,7 +1193,7 @@ if (@kodSystemowy=2) begin
 			from @firma f
 			FOR XML PATH(''), TYPE
 		)
-		FOR XML PATH('') --, ROOT('Faktura') odremowaæ root i scheme przed selectem g³ównym
+		FOR XML PATH('') --, ROOT('Faktura') odremowaÄ‡ root i scheme przed selectem gÅ‚Ã³wnym
 	)
 end
 
@@ -1203,7 +1203,7 @@ if (@kodSystemowy=2) begin
 	set @edt='http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2022/01/05/eD/DefinicjeTypy/'
 	set @targetNamespace='http://crd.gov.pl/wzor/2023/06/29/12648/'
 end
--- to poni¿ej nie konieczne, jeœli mamy ;WITH ze schem¹ przed selectem
+-- to poniÅ¼ej nie konieczne, jeÅ›li mamy ;WITH ze schemÄ… przed selectem
 set @cRequest = cast(
     '<Faktura '+
 		'xmlns="'+@targetNamespace+'" '+
